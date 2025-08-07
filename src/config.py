@@ -1,7 +1,8 @@
+from typing import TypedDict
+import colorlog
 from enum import Enum
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import JsonValue, field_validator
-import colorlog
+from pydantic import Json, JsonValue, field_validator
 from urllib.parse import quote
 
 from sqlalchemy import URL
@@ -71,6 +72,11 @@ class PostgresSettings(BaseSettings):
         )
 
 
+class TreeStruct(TypedDict):
+    tag: str
+    children: list["TreeStruct"]
+
+
 class TreeSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="TREE_",
@@ -78,7 +84,7 @@ class TreeSettings(BaseSettings):
         env_file=".env",
     )
 
-    struct: JsonValue = []
+    struct: TreeStruct | list[TreeStruct] = []
     max_height: int = 3
 
 

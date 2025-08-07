@@ -1,1 +1,1 @@
-from cruds.activities_crud import activities_crud
+from src.cruds.activities_crud import activities_crud

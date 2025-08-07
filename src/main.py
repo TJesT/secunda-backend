@@ -5,7 +5,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 
 from src.api import routers
 from src.cruds import activities_crud
-from src.core.bittree import tree_builder
+from src.core.bittree import tree_builder, Tree
 from src.config import tree_settings
 
 
@@ -22,6 +22,9 @@ async def create_tags_if_not_exist():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # await create_tags_if_not_exist()
+    tree = tree_settings.struct
+    tree = tree if isinstance(tree, list) else [tree]
+    tree_builder.build_bitmaps(list(map(Tree.model_validate, tree)))
     yield
 
 
