@@ -13,7 +13,7 @@ async def create_tags_if_not_exist():
     if not await activities_crud.read():
         if not tree_settings.struct:
             raise RuntimeError(
-                "Database does not contain tags. You should set env TREE_STRUCT."
+                "Database does not contain activities. You should set env TREE_STRUCT."
             )
         activity_tags = tree_builder.build_bitmaps(tree_settings.struct)
         await activities_crud.update(activity_tags)
@@ -24,7 +24,9 @@ async def lifespan(app: FastAPI):
     # await create_tags_if_not_exist()
     tree = tree_settings.struct
     tree = tree if isinstance(tree, list) else [tree]
-    tree_builder.build_bitmaps(list(map(Tree.model_validate, tree)))
+    forest = list(map(Tree.model_validate, tree))
+    # print(forest, "\n")
+    tree_builder.build_bitmaps(forest)
     yield
 
 

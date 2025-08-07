@@ -26,13 +26,16 @@ class Tree(BaseModel):
         return values
 
 
+type Forest = Tree | list[Tree]
+
+
 class TreeBuilder:
     def __init__(self):
         self.bitmaps = {}
 
     def build_bitmaps(
         self,
-        tree: list[Tree] | Tree,
+        tree: Forest,
         /,
         return_carry: bool = False,
         autocache: bool = True,
@@ -73,16 +76,16 @@ class TreeBuilder:
 
         return bitmaps
 
-    def map_bits(
+    def tree2bits(
         self,
-        tree: list[Tree] | Tree,
+        tree: Forest,
         /,
         bitmaps: dict[str, int] = None,
     ) -> int:
-        if bitmaps == None:
+        if bitmaps is None:
             bitmaps = self.bitmaps
 
-        def _get_leafs(tree: list[Tree] | Tree) -> list[str]:
+        def _get_leafs(tree: Forest) -> list[str]:
             match tree:
                 case node_list if isinstance(node_list, list):
                     return reduce(list.__add__, map(_get_leafs, node_list), [])

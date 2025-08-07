@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, ARRAY
-from sqlalchemy.dialects.postgresql import BIT
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, ARRAY, ForeignKey
+from sqlalchemy.dialects.postgresql import BIT, JSON
 from geoalchemy2 import Geometry
 
 from src.db.base import PostgresBase
@@ -11,13 +10,9 @@ class Organizations(PostgresBase):
 
     id = Column(Integer(), primary_key=True, autoincrement=True)
     name = Column(String(128))
-    phone_numbers = Column(
-        ARRAY(String(16)),
-        nullable=False,
-        insert_default=[],
-    )
-    building = relationship("Buildings")
-    activity_bitmap = Column(BIT(1024), nullable=False, unique=False)
+    phone_numbers = Column(ARRAY(String(16)), nullable=False, insert_default=[])
+    building_id = Column(Integer(), ForeignKey("buildings.id"))
+    activity_tag = Column(String(128), ForeignKey("activities.tag"))
 
 
 class Buildings(PostgresBase):
@@ -32,5 +27,5 @@ class Buildings(PostgresBase):
 class Activities(PostgresBase):
     __tablename__ = "activities"
 
-    tag = Column(String(128), nullable=False, unique=True, primary_key=True)
+    tag = Column(String(128), nullable=False, unique=False, primary_key=True)
     bitmap = Column(BIT(1024), nullable=False, unique=False)
