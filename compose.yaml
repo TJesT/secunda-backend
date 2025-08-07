@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  db:
+    image: postgis/postgis
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=tjest
+      - POSTGRES_PASSWORD=f89072hq4f890ghwaf
+      - POSTGRES_DB=backend
+      - PGDATA=/data/postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgres_data:/data/postgres"
+      - "./.config/postgres/initdb.d:/docker-entrypoint-initdb.d"
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U tjest -d backend'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  backend:
+    build: .
+    restart: "on-failure"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+
+
+volumes:
+  postgres_data:

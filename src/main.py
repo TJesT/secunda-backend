@@ -4,19 +4,19 @@ from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 
 from src.api import routers
-from src.cruds import actions_crud
+from src.cruds import activities_crud
 from src.core.bittree import tree_builder
 from src.config import tree_settings
 
 
 async def create_tags_if_not_exist():
-    if not await actions_crud.read():
+    if not await activities_crud.read():
         if not tree_settings.struct:
             raise RuntimeError(
                 "Database does not contain tags. You should set env TREE_STRUCT."
             )
-        tags = tree_builder.build_bitmaps(tree_settings.struct)
-        await actions_crud.update(tags)
+        activity_tags = tree_builder.build_bitmaps(tree_settings.struct)
+        await activities_crud.update(activity_tags)
 
 
 @asynccontextmanager

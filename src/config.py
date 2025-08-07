@@ -2,6 +2,9 @@ from enum import Enum
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import JsonValue, field_validator
 import colorlog
+from urllib.parse import quote
+
+from sqlalchemy import URL
 
 
 class LogLevel(Enum):
@@ -42,7 +45,7 @@ class PostgresSettings(BaseSettings):
         env_file=".env",
     )
 
-    driver: str = "asyncpg+postgres"
+    driver: str = "postgresql+asyncpg"
     username: str
     password: str
     host: str
@@ -50,16 +53,29 @@ class PostgresSettings(BaseSettings):
     db: str
 
     @property
-    def dsn(self) -> str:
+    def dsn_alembic(self) -> URL:
+        pswd = quote(self.password).replace("%", "%%")
         return (
-            f"{self.driver}://{self.username}:{self.password}"
-            f"@{self.host}:{self.port}/{self.db}"
+            f"{self.driver}://{self.username}:{pswd}@{self.host}:{self.port}/{self.db}"
+        )
+
+    @property
+    def dsn(self) -> URL:
+        return URL.create(
+            drivername=self.driver,
+            username=self.username,
+            password=self.password,
+            host=self.host,
+            port=self.port,
+            database=self.db,
         )
 
 
 class TreeSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="TREE_", extra="ignore", env_file=".env"
+        env_prefix="TREE_",
+        extra="ignore",
+        env_file=".env",
     )
 
     struct: JsonValue = []
