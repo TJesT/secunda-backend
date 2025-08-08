@@ -5,7 +5,7 @@ services:
     image: postgis/postgis
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=abutalabashuneba
+      - POSTGRES_USER=tjest
       - POSTGRES_PASSWORD=f89072hq4f890ghwaf
       - POSTGRES_DB=backend
       - PGDATA=/data/postgres

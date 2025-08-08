@@ -1,5 +1,5 @@
 from typing import Literal, Sequence, TypedDict, Unpack
-from sqlalchemy import cast, text, select, and_
+from sqlalchemy import cast, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import BIT, insert
 from geoalchemy2.functions import ST_DWithin
@@ -7,15 +7,6 @@ from geoalchemy2.functions import ST_DWithin
 
 from src.db.models import Organizations, Activities, Buildings
 from src.cruds.base import MAX_LIMIT
-
-
-SQL_FIND_BY_POINT_AND_RADIUS = """select o.id, o."name", o.phone_numbers, b.address, b.geo_point, o.activity
-from organizations o 
-left join buildings b on o.building_id = b.id
-where ST_DWithin('POINT({lon} {lat})'::geography, buildings.geo_point, {r})
-limit {limit}
-offset {offset}
-"""
 
 
 class OrganizationsFields(TypedDict, total=False):
@@ -93,13 +84,6 @@ class OrganizationsCRUD:
         limit: int = MAX_LIMIT,
         offset: int = 0,
     ):
-        sql = SQL_FIND_BY_POINT_AND_RADIUS.format(
-            lon=lon,
-            lat=lat,
-            r=r,
-            limit=limit,
-            offset=offset,
-        )
         return (
             await session.execute(
                 select(
@@ -120,7 +104,6 @@ class OrganizationsCRUD:
                 .offset(offset)
             )
         ).fetchall()
-        # return (await session.execute(text(sql))).fetchall()
 
     @staticmethod
     async def find_by_activity(
@@ -138,8 +121,11 @@ class OrganizationsCRUD:
         bits_clause = {
             "exact": Activities.tag == tag,
             "includes": (
-                (Activities.bitmap.bitwise_and(casted_bits) > casted_zero)
-                & (Activities.bitmap <= casted_bits)
+                (
+                    (Activities.bitmap.bitwise_and(casted_bits) > casted_zero)
+                    & (Activities.bitmap < casted_bits)
+                )
+                | (Activities.tag == tag)
             ),
         }
         return (
