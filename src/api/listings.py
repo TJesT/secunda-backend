@@ -4,6 +4,7 @@ from pydantic import AfterValidator, BaseModel, field_validator
 from shapely import wkb
 from geoalchemy2 import WKBElement
 
+from src.core.auth import get_api_key
 from src.config import LAT2METRES_COEFF
 from src.db import get_db_session
 from src.cruds import organizations_crud, MAX_LIMIT
@@ -47,7 +48,11 @@ class OrganizationResponse(BaseModel):
         return raw
 
 
-@router.get("/by-id/{organization_id}", status_code=status.HTTP_200_OK)
+@router.get(
+    "/by-id/{organization_id}",
+    dependencies=[Depends(get_api_key)],
+    status_code=status.HTTP_200_OK,
+)
 async def get_org_by_id(
     organization_id: int,
     *,
@@ -64,7 +69,11 @@ async def get_org_by_id(
     return result[0]
 
 
-@router.get("/by-name/{name}", status_code=status.HTTP_200_OK)
+@router.get(
+    "/by-name/{name}",
+    dependencies=[Depends(get_api_key)],
+    status_code=status.HTTP_200_OK,
+)
 async def get_org_by_name(
     name: str,
     *,
@@ -82,7 +91,11 @@ async def get_org_by_name(
     return result[0]
 
 
-@router.get("/by-building/{building_id}", status_code=status.HTTP_200_OK)
+@router.get(
+    "/by-building/{building_id}",
+    dependencies=[Depends(get_api_key)],
+    status_code=status.HTTP_200_OK,
+)
 async def get_org_by_building(
     building_id: int,
     limit: int = MAX_LIMIT,
@@ -106,7 +119,11 @@ async def get_org_by_building(
     return result
 
 
-@router.get("/by-activity/{activity}", status_code=status.HTTP_200_OK)
+@router.get(
+    "/by-activity/{activity}",
+    dependencies=[Depends(get_api_key)],
+    status_code=status.HTTP_200_OK,
+)
 async def get_orgs_by_exact_activity(
     activity: Activity,
     limit: int = MAX_LIMIT,
@@ -134,7 +151,11 @@ async def get_orgs_by_exact_activity(
     return result
 
 
-@router.get("/by-activity-with-children/{activity}", status_code=status.HTTP_200_OK)
+@router.get(
+    "/by-activity-with-children/{activity}",
+    dependencies=[Depends(get_api_key)],
+    status_code=status.HTTP_200_OK,
+)
 async def get_orgs_including_activity(
     activity: Activity,
     limit: int = MAX_LIMIT,
@@ -162,7 +183,11 @@ async def get_orgs_including_activity(
     return result
 
 
-@router.get("/by-point-and-radius", status_code=status.HTTP_200_OK)
+@router.get(
+    "/by-point-and-radius",
+    dependencies=[Depends(get_api_key)],
+    status_code=status.HTTP_200_OK,
+)
 async def get_orgs_by_exact_activity(
     longitude: float,
     latitude: float,

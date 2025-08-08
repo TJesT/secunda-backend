@@ -27,6 +27,7 @@ class AppSettings(BaseSettings):
     )
 
     log_level: LogLevel = LogLevel.NOTSET
+    api_key: str
 
     @field_validator("log_level", mode="before")
     @classmethod

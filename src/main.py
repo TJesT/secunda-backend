@@ -1,8 +1,9 @@
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.openapi.docs import get_swagger_ui_html
 
+from src.config import app_settings
 from src.api import routers
 from src.data.factories import (
     insert_activities_if_not_exist,
@@ -12,32 +13,6 @@ from src.data.factories import (
 from src.cruds import activities_crud
 from src.core.bittree import tree_builder
 from src.db.base import async_session_factory
-
-"""
-Milk: 0000001, 1
-Dairy Products: 0000001, 1
-Pork: 0000010, 2
-Beef: 0000100, 4
-Meat Products: 0000110, 6
-Food: 0000111, 7
-Cargo: 0001000, 8
-Passenger: 0010000, 16
-Parts: 0100000, 32
-Accessories: 1000000, 64
-Vehicle: 1111000, 120
-
-"Milk": 10000000, 128
-"Dairy Products": 10000000, 128
-"Pork": 01000000, 64
-"Beef": 00100000, 32
-"Meat Products": 01100000, 96
-"Food": 11100000, 224
-"Cargo": 16
-"Passenger": 8
-"Parts": 4
-"Accessories": 2
-"Vehicle": 30
-"""
 
 
 async def pull_activities():
