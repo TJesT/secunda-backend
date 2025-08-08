@@ -4,29 +4,55 @@ from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 
 from src.api import routers
+from src.data.factories import (
+    insert_activities_if_not_exist,
+    insert_buildings_if_not_exist,
+    insert_organizations_if_not_exist,
+)
 from src.cruds import activities_crud
-from src.core.bittree import tree_builder, Tree
-from src.config import tree_settings
+from src.core.bittree import tree_builder
+from src.db.base import async_session_factory
+
+"""
+Milk: 0000001, 1
+Dairy Products: 0000001, 1
+Pork: 0000010, 2
+Beef: 0000100, 4
+Meat Products: 0000110, 6
+Food: 0000111, 7
+Cargo: 0001000, 8
+Passenger: 0010000, 16
+Parts: 0100000, 32
+Accessories: 1000000, 64
+Vehicle: 1111000, 120
+
+"Milk": 10000000, 128
+"Dairy Products": 10000000, 128
+"Pork": 01000000, 64
+"Beef": 00100000, 32
+"Meat Products": 01100000, 96
+"Food": 11100000, 224
+"Cargo": 16
+"Passenger": 8
+"Parts": 4
+"Accessories": 2
+"Vehicle": 30
+"""
 
 
-async def create_tags_if_not_exist():
-    if not await activities_crud.read():
-        if not tree_settings.struct:
-            raise RuntimeError(
-                "Database does not contain activities. You should set env TREE_STRUCT."
-            )
-        activity_tags = tree_builder.build_bitmaps(tree_settings.struct)
-        await activities_crud.update(activity_tags)
+async def pull_activities():
+    async with async_session_factory() as session:
+        result = await activities_crud.read(session)
+
+        return {row[0].tag: int.from_bytes(row[0].bitmap.bytes[::-1]) for row in result}
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # await create_tags_if_not_exist()
-    tree = tree_settings.struct
-    tree = tree if isinstance(tree, list) else [tree]
-    forest = list(map(Tree.model_validate, tree))
-    # print(forest, "\n")
-    tree_builder.build_bitmaps(forest)
+    await insert_activities_if_not_exist()
+    tree_builder.bitmaps = await pull_activities()
+    await insert_buildings_if_not_exist()
+    await insert_organizations_if_not_exist()
     yield
 
 

@@ -7,6 +7,8 @@ from urllib.parse import quote
 
 from sqlalchemy import URL
 
+LAT2METRES_COEFF = 1 / 111000
+
 
 class LogLevel(Enum):
     NOTSET = colorlog.NOTSET
