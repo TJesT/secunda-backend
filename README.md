@@ -1,5 +1,7 @@
 ## Exploitation guide
 
+[Windows only] *0) After cloning you need to change CRLF to LF for file ./entrpoint.sh, or backend would fail to start.
+
 1) Run service with database:
 ```bash
 docker compose -f compose.yaml up -d
